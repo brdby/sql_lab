@@ -235,17 +235,3 @@ INSERT INTO Liquidation
            (2, 2, 3, TIMESTAMP '2015-01-08 14:05:06', TIMESTAMP '2015-01-08 18:05:06'),
            (3, 3, 4, TIMESTAMP '2017-01-08 12:05:06', TIMESTAMP '2017-01-08 13:05:06'),
            (4, 4, 3, TIMESTAMP '2018-01-08 19:05:06', TIMESTAMP '2018-01-08 22:05:06');
-
-SELECT DISTINCT FullName FROM LS_PSCH;
-
-SELECT FullName FROM LS_PSCH;
-
-SELECT * FROM DepartmentMembers WHERE DepartmentRole = 'РЕАГИРОВАНИЕ';
-
-SELECT DepartmentRole, COUNT(DepartmentMembersID) as DepartmentsCount from DepartmentMembers GROUP BY DepartmentRole;
-
-SELECT DepartmentMembersID, COUNT(EmployeeID) as DepartmentMembersCount from LS_PSCH GROUP BY DepartmentMembersID;
-
-SELECT * FROM DepartmentMembers WHERE DepartmentRole = 'РЕАГИРОВАНИЕ' UNION SELECT * FROM DepartmentMembers WHERE DepartmentRole = 'ТУШЕНИЕ';
-
-SELECT * FROM Fire JOIN Facility ON Fire.FacilityID = Facility.FacilityID;
