@@ -12,9 +12,9 @@ UPDATE Mechanism SET MechanismName='Грузильщик' WHERE MechanismID=7;
 
 --DELETE
 
-DELETE FROM PSCH WHERE PSCHName='Отличная';
-
 DELETE FROM Mechanism WHERE MechanismName='Грузильщик';
+
+DELETE FROM PSCH WHERE PSCHName='Отличная';
 
 --SELECT
 
@@ -26,13 +26,17 @@ SELECT EmployeeID, FullName FROM LS_PSCH WHERE DepartmentMembersID=3;
 
 --Big queries
 
-SELECT DepartmentMembersID, COUNT(*) FROM LS_PSCH WHERE PSCHID=1
-    GROUP BY DepartmentMembersID;
-    UNION ALL SELECT DepartmentMembersID, COUNT(*) FROM LS_PSCH WHERE PSCHID=2
+SELECT DepartmentMembersID, COUNT(*) FROM LS_PSCH
+    WHERE PSCHID=1
+    GROUP BY DepartmentMembersID
+    UNION ALL SELECT DepartmentMembersID, COUNT(*) FROM LS_PSCH
+    WHERE PSCHID=2
     GROUP BY DepartmentMembersID;
 
-SELECT FacilityID, COUNT(*) FROM Fire WHERE FacilityID='Крутой обьект'
+SELECT FacilityID, COUNT(*) FROM Fire
+    WHERE FacilityID='Крутой обьект'
     GROUP BY FacilityID
-    UNION ALL SELECT FacilityID, COUNT(*) FROM Fire WHERE FacilityID='Крутой обьект 2'
+    UNION ALL SELECT FacilityID, COUNT(*)
+    FROM Fire WHERE FacilityID='Крутой обьект 2'
     GROUP BY FacilityID
     ORDER BY FacilityID DESC;
