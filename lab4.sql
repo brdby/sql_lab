@@ -50,6 +50,7 @@ SELECT * FROM LS_PSCH_log;
 CREATE FUNCTION Fire_power_changed() RETURNS trigger AS $$
     BEGIN
     RAISE NOTICE 'Fire power was changed!';
+    RETURN NEW;
     END;
     $$ LANGUAGE plpgsql;
 
@@ -62,7 +63,7 @@ CREATE TRIGGER fire_update
 --Test trigger
 
 INSERT INTO Fire VALUES (10, 2, 13, 'чего', 'Крутой обьект');
-UPDATE Fire SET FireID=10  WHERE FireID=10;
+UPDATE Fire SET FirePower=10  WHERE FireID=10;
 DELETE FROM Fire WHERE FireID=10;
 
 --Trigger
