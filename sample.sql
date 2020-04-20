@@ -182,7 +182,6 @@ INSERT INTO Department
            (5, 5, '01-01-2010', 2),
            (6, 6, '01-01-2010', 2);
 
-
 INSERT INTO DepartmentMembers
     VALUES (1, 'РЕАГИРОВАНИЕ', 1),
            (2, 'ТУШЕНИЕ', 2),

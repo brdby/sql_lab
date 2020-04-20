@@ -5,7 +5,7 @@ CREATE FUNCTION one() RETURNS integer AS $$
     $$ LANGUAGE SQL;
 
 CREATE FUNCTION sum_fire_danger(FirePower SMALLINT, FireArea SMALLINT)
-    RETURNS SMALLINT AS 'SELECT FirePower*FireArea;'
+    RETURNS SMALLINT AS 'SELECT FirePower+FireArea;'
     LANGUAGE SQL;
 
 CREATE FUNCTION getLS(id SMALLINT) RETURNS SETOF LS_PSCH AS $$
@@ -18,7 +18,7 @@ SELECT one();
 
 SELECT FireID, sum_fire_danger(FirePower, FireArea) FROM Fire;
 
-SELECT getLS(1);
+SELECT getLS(1::SMALLINT);
 
 --Trigger
 CREATE TABLE LS_PSCH_log(
@@ -29,7 +29,8 @@ CREATE TABLE LS_PSCH_log(
 
 CREATE FUNCTION LS_PSCH_logAction() RETURNS trigger AS $$
     BEGIN
-    INSERT INTO LS_PSCH_log VALUES (TG_OP, NOW());
+      INSERT INTO LS_PSCH_log VALUES (TG_OP, NOW());
+      RETURN NEW;
     END;
     $$ LANGUAGE plpgsql;
 
@@ -46,7 +47,7 @@ SELECT * FROM LS_PSCH_log;
 
 --Trigger
 
-CREATE FUNCTION Fire_id_changed() RETURNS trigger AS $$
+CREATE FUNCTION Fire_power_changed() RETURNS trigger AS $$
     BEGIN
     RAISE NOTICE 'Fire power was changed!';
     END;
@@ -60,8 +61,9 @@ CREATE TRIGGER fire_update
 
 --Test trigger
 
-UPDATE Fire SET FireID=10  WHERE FireID=3;
-UPDATE Fire SET FirePower=1  WHERE FireID=3;
+INSERT INTO Fire VALUES (10, 2, 13, 'чего', 'Крутой обьект');
+UPDATE Fire SET FireID=10  WHERE FireID=10;
+DELETE FROM Fire WHERE FireID=10;
 
 --Trigger
 
@@ -80,7 +82,7 @@ CREATE OR REPLACE FUNCTION forbid_more_than() RETURNS trigger
     $$;
 
 CREATE TRIGGER forbid_more_than_1
-    AFTER DELETE ON Fire
+    AFTER DELETE ON PSCH
     REFERENCING OLD TABLE AS deleted_rows
     FOR EACH STATEMENT
     EXECUTE PROCEDURE forbid_more_than(1);
@@ -88,11 +90,11 @@ CREATE TRIGGER forbid_more_than_1
 --Test trigger
 
 INSERT INTO PSCH
-    VALUES  (11, 'Крутая', 'Первая верхняя 3А',  '74955553535', 'Иванов В.В.', 'Первый')
-            (12, 'Крутая', 'Первая верхняя 3А',  '74955553535', 'Иванов В.В.', 'Первый')
-            (13, 'Крутая', 'Первая верхняя 3А',  '74955553535', 'Иванов В.В.', 'Первый')
-            (14, 'Крутая', 'Первая верхняя 3А',  '74955553535', 'Иванов В.В.', 'Первый')
-            (15, 'Крутая', 'Первая верхняя 3А',  '74955553535', 'Иванов В.В.', 'Первый');
+    VALUES (11, 'Крутая', 'Первая верхняя 3А',  '74955553535', 'Иванов В.В.', 'Первый'),
+           (12, 'Крутая', 'Первая верхняя 3А',  '74955553535', 'Иванов В.В.', 'Первый'),
+           (13, 'Крутая', 'Первая верхняя 3А',  '74955553535', 'Иванов В.В.', 'Первый'),
+           (14, 'Крутая', 'Первая верхняя 3А',  '74955553535', 'Иванов В.В.', 'Первый'),
+           (15, 'Крутая', 'Первая верхняя 3А',  '74955553535', 'Иванов В.В.', 'Первый');
 
 DELETE FROM PSCH WHERE PSCHID>10;
 
@@ -121,12 +123,12 @@ CREATE TABLE aaa
 DROP EVENT TRIGGER IF EXISTS abort_ddl;
 DROP TRIGGER IF EXISTS lspsch_modification ON LS_PSCH;
 DROP TRIGGER IF EXISTS fire_update ON Fire;
-DROP TRIGGER IF EXISTS forbid_more_than_1 ON Fire;
+DROP TRIGGER IF EXISTS forbid_more_than_1 ON PSCH;
 DROP FUNCTION IF EXISTS one();
 DROP FUNCTION IF EXISTS sum_fire_danger(FirePower SMALLINT, FireArea SMALLINT);
 DROP FUNCTION IF EXISTS getLS(id SMALLINT);
 DROP FUNCTION IF EXISTS LS_PSCH_logAction();
-DROP FUNCTION IF EXISTS Fire_id_changed();
+DROP FUNCTION IF EXISTS Fire_power_changed();
 DROP FUNCTION IF EXISTS forbid_more_than();
 DROP FUNCTION IF EXISTS abort_any_command();
 DROP TABLE LS_PSCH_log;
