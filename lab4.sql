@@ -24,7 +24,7 @@ CREATE FUNCTION LS_PSCH_logAction() RETURNS trigger AS $$
     $$ LANGUAGE plpgsql;
 
 CREATE FUNCTION Fire_id_changed() RETURNS trigger AS $$
-    RAISE EXCEPTION 'Fire ID was changed!';
+    RAISE NOTICE 'Fire ID was changed!';
     $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER lspsch_modification
@@ -32,7 +32,7 @@ CREATE TRIGGER lspsch_modification
     EXECUTE PROCEDURE add_to_log ();
 
 CREATE OR REPLACE FUNCTION forbid_more_than() RETURNS trigger
-    ANGUAGE plpgsql AS
+    LANGUAGE plpgsql AS
     $$
     DECLARE
         n bigint := TG_ARGV[0];
@@ -54,7 +54,7 @@ CREATE TRIGGER forbid_more_than_5
 CREATE TRIGGER fire_update
     BEFORE UPDATE ON Fire
     WHEN (OLD.FireID IS DISTINCT FROM NEW.FireID)
-    EXECUTE PROCEDURE ;
+    EXECUTE PROCEDURE Fire_id_changed();
 
 --Event trigger
 
@@ -71,9 +71,14 @@ CREATE EVENT TRIGGER abort_ddl ON ddl_command_start
    EXECUTE PROCEDURE abort_any_command();
 
 --Drop unnecessary
-/*
 DROP EVENT TRIGGER IF EXISTS abort_ddl;
-DROP TRIGGER IF EXISTS fire_delete;
+DROP TRIGGER IF EXISTS lspsch_modification;
 DROP TRIGGER IF EXISTS fire_update;
 DROP TRIGGER IF EXISTS forbid_more_than_5;
-*/
+DROP FUNCTION IF EXISTS one();
+DROP FUNCTION IF EXISTS sum_fire_danger(FirePower SMALLINT, FireArea SMALLINT);
+DROP FUNCTION IF EXISTS getLS(id SMALLINT);
+DROP FUNCTION IF EXISTS LS_PSCH_logAction();
+DROP FUNCTION IF EXISTS Fire_id_changed();
+DROP FUNCTION IF EXISTS forbid_more_than();
+DROP FUNCTION IF EXISTS abort_any_command();
