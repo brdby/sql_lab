@@ -20,11 +20,15 @@ CREATE TABLE LS_PSCH_log(
 
 
 CREATE FUNCTION LS_PSCH_logAction() RETURNS trigger AS $$
+    BEGIN
     INSERT INTO LS_PSCH_log VALUES (TG_OP, NOW());
+    END;
     $$ LANGUAGE plpgsql;
 
 CREATE FUNCTION Fire_id_changed() RETURNS trigger AS $$
+    BEGIN
     RAISE NOTICE 'Fire ID was changed!';
+    END;
     $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER lspsch_modification
@@ -59,13 +63,13 @@ CREATE TRIGGER fire_update
 --Event trigger
 
 CREATE OR REPLACE FUNCTION abort_any_command()
-  RETURNS event_trigger
- LANGUAGE plpgsql
-  AS $$
-BEGIN
-  RAISE EXCEPTION 'command % not allowed', tg_tag;
-END;
-$$;
+    RETURNS event_trigger
+    LANGUAGE plpgsql
+        AS $$
+        BEGIN
+        RAISE EXCEPTION 'command % not allowed', tg_tag;
+        END;
+        $$;
 
 CREATE EVENT TRIGGER abort_ddl ON ddl_command_start
    EXECUTE PROCEDURE abort_any_command();
@@ -82,3 +86,4 @@ DROP FUNCTION IF EXISTS LS_PSCH_logAction();
 DROP FUNCTION IF EXISTS Fire_id_changed();
 DROP FUNCTION IF EXISTS forbid_more_than();
 DROP FUNCTION IF EXISTS abort_any_command();
+DROP TABLE LS_PSCH_log;
