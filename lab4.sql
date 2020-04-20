@@ -5,7 +5,7 @@ CREATE FUNCTION one() RETURNS integer AS $$
     $$ LANGUAGE SQL;
 
 CREATE FUNCTION sum_fire_danger(FirePower SMALLINT, FireArea SMALLINT)
-    RETURNS INTEGER AS 'SELECT FirePower*FireArea;'
+    RETURNS SMALLINT AS 'SELECT FirePower*FireArea;'
     LANGUAGE SQL;
 
 CREATE FUNCTION getLS(id SMALLINT) RETURNS SETOF LS_PSCH AS $$
@@ -13,31 +13,48 @@ CREATE FUNCTION getLS(id SMALLINT) RETURNS SETOF LS_PSCH AS $$
     $$ LANGUAGE SQL;
 
 --Triggers
-
-CREATE FUNCTION delete_error() RETURNS TEXT AS $$
-    SELECT 'Delete is not allowed here' AS Error;
-    $$ LANGUAGE SQL;
-
 CREATE TABLE LS_PSCH_log(
     Operation text,
     TimeOfOperation timestamp without time zone
 );
 
 
-CREATE FUNCTION LS_PSCH_logAction() RETURNS TRIGGER AS $$
+CREATE FUNCTION LS_PSCH_logAction() RETURNS trigger AS $$
     INSERT INTO LS_PSCH_log VALUES (TG_OP, NOW());
-    $$ LANGUAGE SQL;
+    $$ LANGUAGE plpgsql;
+
+CREATE FUNCTION Fire_id_changed() RETURNS trigger AS $$
+    RAISE EXCEPTION 'Fire ID was changed!';
+    $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER lspsch_modification
     AFTER INSERT OR UPDATE OR DELETE ON LS_PSCH
     EXECUTE PROCEDURE add_to_log ();
 
-CREATE TRIGGER fire_delete
-    INSTEAD OF DELETE ON Fire
-    EXECUTE PROCEDURE delete_error();
+CREATE OR REPLACE FUNCTION forbid_more_than() RETURNS trigger
+    ANGUAGE plpgsql AS
+    $$
+    DECLARE
+        n bigint := TG_ARGV[0];
+    BEGIN
+        IF (SELECT count(*) FROM deleted_rows) <= n IS NOT TRUE
+    THEN
+        RAISE EXCEPTION 'More than % rows deleted', n;
+    END IF;
+        RETURN OLD;
+    END;
+    $$;
+
+CREATE TRIGGER forbid_more_than_5
+    AFTER DELETE ON Fire
+    REFERENCING OLD TABLE AS deleted_rows
+    FOR EACH STATEMENT
+    EXECUTE PROCEDURE forbid_more_than(1);
 
 CREATE TRIGGER fire_update
-    INSTEAD OF UPDATE ON Fire ;
+    BEFORE UPDATE ON Fire
+    WHEN (OLD.FireID IS DISTINCT FROM NEW.FireID)
+    EXECUTE PROCEDURE ;
 
 --Event trigger
 
@@ -58,4 +75,5 @@ CREATE EVENT TRIGGER abort_ddl ON ddl_command_start
 DROP EVENT TRIGGER IF EXISTS abort_ddl;
 DROP TRIGGER IF EXISTS fire_delete;
 DROP TRIGGER IF EXISTS fire_update;
+DROP TRIGGER IF EXISTS forbid_more_than_5;
 */
